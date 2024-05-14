@@ -41,5 +41,7 @@ dependencies {
     androidTestImplementation(libs.espresso.core)
     // https://mvnrepository.com/artifact/androidx.camera/camera-camera2
     implementation("androidx.camera:camera-camera2:1.4.0-alpha05")
-
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation ("com.squareup.picasso:picasso:2.71828")
 }
