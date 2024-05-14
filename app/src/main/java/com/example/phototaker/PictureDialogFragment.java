@@ -4,6 +4,7 @@ import android.app.Dialog;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
@@ -35,37 +36,46 @@ public class PictureDialogFragment extends DialogFragment {
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
+        // Create a new dialog
         Dialog dialog = super.onCreateDialog(savedInstanceState);
-
         // Get the image file path from the arguments
+
         String imageFilePath = getArguments().getString("imageFilePath");
         //Load the image from the file path
         takenImage = BitmapFactory.decodeFile(imageFilePath);
 
         // Inflate the layout for the dialog
         View view = LayoutInflater.from(getContext()).inflate(R.layout.fragment_dialog, null);
+        // Set the inflated layout as the content view for the dialog
         dialog.setContentView(view);
 
-        // Initialize the ImageView and TextView
+        // Initialize the ImageView and TextView from the inflated layout
         imageView = view.findViewById(R.id.imageView);
         textView = view.findViewById(R.id.TextName);
 
-        // Set the image to the ImageView
+        // Set the loaded image to the ImageView
         imageView.setImageBitmap(takenImage);
 
+        // Create a Retrofit instance
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("https://pokeapi.co/api/v2/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
+        // Create a PokeApi instance from the Retrofit instance
         PokeApi pokeApi = retrofit.create(PokeApi.class);
 
+        // Make an asynchronous request to get all Pokemon
         pokeApi.getAllPokemon().enqueue(new Callback<PokemonResponse>() {
             @Override
             public void onResponse(Call<PokemonResponse> call, Response<PokemonResponse> response) {
+                // This method is called when the request gets a response
                 if (response.isSuccessful() && response.body() != null) {
+                    // If the response is successful and contains a body
                     Random random = new Random();
+                    // Select a random Pokemon from the response
                     Pokemon randomPokemon = response.body().getResults().get(random.nextInt(response.body().getResults().size()));
+                    // Set the name of the random Pokemon to the TextView
                     textView.setText("You are a " + randomPokemon.getName());
                 }
             }
@@ -73,9 +83,11 @@ public class PictureDialogFragment extends DialogFragment {
             @Override
             public void onFailure(Call<PokemonResponse> call, Throwable t) {
                 // Handle the error
+                Log.e("PictureDialogFragment", "Request failed: " + t.getMessage(), t);
             }
         });
 
+        // Return the created dialog
         return dialog;
     }
 }
